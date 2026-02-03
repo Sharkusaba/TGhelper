@@ -1,12 +1,23 @@
 import logging
+import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from dotenv import load_dotenv
+
+# Загружаем переменные окружения из .env файла
+load_dotenv()
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
+
+# Чтение токена из .env файла
+TOKEN = os.getenv('TELEGRAM_BOT_TOKEN_HELPUS')
+
+if not TOKEN:
+    raise ValueError("❌ Токен бота не найден! Добавьте TELEGRAM_BOT_TOKEN_HELPUS в файл .env")
 
 ABOUT_TEXT = """Анимешники России — общественно-политическое движение, собравшее вокруг себя всех поклонников японской культуры. С 1905 года мы защищаем гордость и честь отечественных отаку."""
 
@@ -150,7 +161,7 @@ FULL_PROGRAM_TEXT = """*Наша программа*
 12 лет — возраст приобретения полной гражданской дееспособности.
 
 *Отмена униформы*
-В МВД вас будут встречать в аниме-парике, в суде — в розовой юбке, а в МФЦ — в налобной повязке Наруто.
+В МВД вас будут встречать в аниме-парике, в суде — в розковой юбке, а в МФЦ — в налобной повязке Наруто.
 
 *Аниме-юстиция*
 Опричнина 21-го века. Действует до полного перехода России в 2D."""
@@ -328,13 +339,19 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 def main() -> None:
-    TOKEN = "TKN"
+    # Проверка токена
+    if not TOKEN:
+        logger.error("Токен бота не найден! Проверьте файл .env")
+        return
+    
+    logger.info(f"Бот запускается с токеном: {TOKEN[:10]}...")
 
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button))
 
+    logger.info("Бот запущен в режиме polling...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
