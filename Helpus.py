@@ -19,7 +19,7 @@ TOKEN = os.getenv('TELEGRAM_BOT_TOKEN_HELPUS')
 if not TOKEN:
     raise ValueError("❌ Токен бота не найден! Добавьте TELEGRAM_BOT_TOKEN_HELPUS в файл .env")
 
-ABOUT_TEXT = """🎌 Анимешники России — общественно-политическое движение, собравшее вокруг себя всех поклонников японской культуры. С 1905 года мы защищаем гордость и честь отечественных отаку."""
+ABOUT_TEXT = """🎌 *Анимешники России* — общественно-политическое движение, собравшее вокруг себя всех поклонников японской культуры. С 1905 года мы защищаем гордость и честь отечественных отаку."""
 
 PROGRAM_TEXT = """📜 *Наша программа*
 
@@ -248,45 +248,45 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_caption(
             caption=ABOUT_TEXT,
+            parse_mode='Markdown',
             reply_markup=reply_markup
         )
 
-   elif data == "program":
-    keyboard = [
-        [create_button("📖 Полная программа", callback_data="full_program")],
-        [create_button("🔙 Назад", callback_data="about")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    elif data == "program":
+        keyboard = [
+            [create_button("📖 Полная программа", callback_data="full_program")],
+            [create_button("🔙 Назад", callback_data="about")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
 
-    if query.message.photo:
-        await query.edit_message_caption(
-            caption=PROGRAM_TEXT,
-            parse_mode='HTML',  # ИЗМЕНИЛИ с 'Markdown' на 'HTML'
-            reply_markup=reply_markup
+        if query.message.photo:
+            await query.edit_message_caption(
+                caption=PROGRAM_TEXT,
+                parse_mode='Markdown',
+                reply_markup=reply_markup
+            )
+        else:
+            await query.message.delete()
+            await context.bot.send_photo(
+                chat_id=query.message.chat_id,
+                photo=MAIN_PHOTO_URL,
+                caption=PROGRAM_TEXT,
+                parse_mode='Markdown',
+                reply_markup=reply_markup
+            )
+
+    elif data == "full_program":
+        keyboard = [
+            [create_button("🔙 Назад к программе", callback_data="program")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        await query.message.reply_text(
+            text=FULL_PROGRAM_TEXT,
+            parse_mode='Markdown',
+            reply_markup=reply_markup,
+            disable_web_page_preview=True
         )
-    else:
-        await query.message.delete()
-        await context.bot.send_photo(
-            chat_id=query.message.chat_id,
-            photo=MAIN_PHOTO_URL,
-            caption=PROGRAM_TEXT,
-            parse_mode='HTML',  # ИЗМЕНИЛИ
-            reply_markup=reply_markup
-        )
-
-   elif data == "full_program":
-    keyboard = [
-        [create_button("🔙 Назад к программе", callback_data="program")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await context.bot.send_message(
-        chat_id=query.message.chat_id,
-        text=FULL_PROGRAM_TEXT,
-        parse_mode='HTML',  # ИЗМЕНИЛИ
-        reply_markup=reply_markup,
-        disable_web_page_preview=True
-    )
 
     elif data == "regions":
         keyboard = []
@@ -372,4 +372,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-
