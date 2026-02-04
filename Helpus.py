@@ -4,8 +4,17 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMe
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 from dotenv import load_dotenv
 
-# Загружаем переменные окружения из .env файла
-load_dotenv()
+# Определяем путь к .env файлу
+ENV_PATH = os.getenv('DOTENV_PATH', '.env_helpus')  # По умолчанию ищем .env_helpus в текущей папке
+
+# Загружаем переменные окружения из указанного .env файла
+if os.path.exists(ENV_PATH):
+    load_dotenv(dotenv_path=ENV_PATH)
+    logging.info(f"Загружен .env файл: {ENV_PATH}")
+else:
+    # Пробуем загрузить из текущей директории
+    load_dotenv()
+    logging.info("Загружен .env файл из текущей директории")
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -17,7 +26,10 @@ logger = logging.getLogger(__name__)
 TOKEN = os.getenv('TELEGRAM_BOT_TOKEN_HELPUS')
 
 if not TOKEN:
-    raise ValueError("❌ Токен бота не найден! Добавьте TELEGRAM_BOT_TOKEN_HELPUS в файл .env")
+    logger.error(f"❌ Токен бота не найден! Проверьте файл: {ENV_PATH}")
+    logger.error(f"Текущая директория: {os.getcwd()}")
+    logger.error(f"Содержимое директории: {os.listdir('.')}")
+    raise ValueError(f"❌ Токен бота не найден! Проверьте TELEGRAM_BOT_TOKEN_HELPUS в файле: {ENV_PATH}")
 
 ABOUT_TEXT = """Анимешники России — общественно-политическое движение, собравшее вокруг себя всех поклонников японской культуры. С 1905 года мы защищаем гордость и честь отечественных отаку."""
 
@@ -357,3 +369,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+
