@@ -259,16 +259,18 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        # Всегда отправляем новое сообщение с фото и программой
-        # Это нужно потому что программа слишком длинная для редактирования подписи
-        await query.message.delete()
-        await context.bot.send_photo(
+        # Сначала отправляем новое сообщение
+        new_message = await context.bot.send_photo(
             chat_id=query.message.chat_id,
             photo=MAIN_PHOTO_URL,
             caption=PROGRAM_TEXT,
             parse_mode='HTML',
             reply_markup=reply_markup
         )
+        
+        # Потом удаляем старое (если это нужно)
+        # Оставляем эту строку закомментированной, чтобы сообщение не удалялось
+        # await query.message.delete()
 
     elif data == "full_program":
         keyboard = [
