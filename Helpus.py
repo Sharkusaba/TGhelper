@@ -19,7 +19,7 @@ TOKEN = os.getenv('TELEGRAM_BOT_TOKEN_HELPUS')
 if not TOKEN:
     raise ValueError("❌ Токен бота не найден! Добавьте TELEGRAM_BOT_TOKEN_HELPUS в файл .env")
 
-ABOUT_TEXT = """🎌 *Анимешники России* — общественно-политическое движение, собравшее вокруг себя всех поклонников японской культуры. С 1905 года мы защищаем гордость и честь отечественных отаку."""
+ABOUT_TEXT = """🎌 Анимешники России — общественно-политическое движение, собравшее вокруг себя всех поклонников японской культуры. С 1905 года мы защищаем гордость и честь отечественных отаку."""
 
 PROGRAM_TEXT = """📜 *Наша программа*
 
@@ -122,7 +122,7 @@ FULL_PROGRAM_TEXT = """📜 *Наша программа*
 Установление русско-японской унии.
 
 📚 *Новое русское образование*
-Роспуск Минпросвещения. Бюджет на образование будет перераспределён.
+Роспуск Минпросвещения. Бюджет на образования будет перераспределён.
 
 🤖 *Национальное нейробудущее*
 ИИ-корпорации должны стать государствообразующими. Россия принимает курс на покупку OpenAI.
@@ -161,7 +161,7 @@ FULL_PROGRAM_TEXT = """📜 *Наша программа*
 12 лет — возраст приобретения полной гражданской дееспособности.
 
 👔 *Отмена униформы*
-В МВД вас будут встречать в аниме-парике, в суде — в розовой юбке, а в МФЦ — в налобной повязке Наруто.
+В МВД вас будут встречать в аниме-парике, в суде — в розковой юбке, а в МФЦ — в налобной повязке Наруто.
 
 ⚖️ *Аниме-юстиция*
 Опричнина 21-го века. Действует до полного перехода России в 2D."""
@@ -248,7 +248,6 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_caption(
             caption=ABOUT_TEXT,
-            parse_mode='Markdown',
             reply_markup=reply_markup
         )
 
@@ -281,7 +280,8 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await query.message.reply_text(
+        await context.bot.send_message(
+            chat_id=query.message.chat_id,
             text=FULL_PROGRAM_TEXT,
             parse_mode='Markdown',
             reply_markup=reply_markup,
@@ -291,9 +291,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     elif data == "regions":
         keyboard = []
         for region in REGIONS.keys():
-            # Убираем эмодзи из ключа для поиска данных
-            clean_region = region.split(' ', 1)[1] if ' ' in region else region
-            keyboard.append([create_button(region, callback_data=f"region_{clean_region}")])
+            keyboard.append([create_button(region, callback_data=f"region_{region}")])
         keyboard.append([create_button("↩️ Назад", callback_data="main_menu")])
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_caption(
@@ -303,12 +301,14 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     elif data.startswith("region_"):
         region_name = data.replace("region_", "")
-        region_data = REGIONS.get(f"🏛️ {region_name}") or \
-                     REGIONS.get(f"🏰 {region_name}") or \
-                     REGIONS.get(f"❄️ {region_name}") or \
-                     REGIONS.get(f"🌳 {region_name}") or \
-                     REGIONS.get(f"🌲 {region_name}") or \
-                     REGIONS.get(region_name)
+        region_data = REGIONS.get(region_name)
+
+        if not region_data:
+            # Если не нашли с эмодзи, ищем без эмодзи в ключах
+            for key in REGIONS.keys():
+                if region_name in key:
+                    region_data = REGIONS[key]
+                    break
 
         keyboard = [
             [create_button("📱 Telegram", url=region_data["telegram"])],
@@ -317,8 +317,8 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        # Получаем оригинальное название с эмодзи
         display_name = region_name
+        # Восстанавливаем эмодзи в названии для отображения
         for key in REGIONS.keys():
             if region_name in key:
                 display_name = key
@@ -356,17 +356,17 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 def main() -> None:
     # Проверка токена
     if not TOKEN:
-        logger.error("❌ Токен бота не найден! Проверьте файл .env")
+        logger.error("Токен бота не найден! Проверьте файл .env")
         return
     
-    logger.info(f"🤖 Бот запускается с токеном: {TOKEN[:10]}...")
+    logger.info(f"Бот запускается с токеном: {TOKEN[:10]}...")
 
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button))
 
-    logger.info("🚀 Бот запущен в режиме polling...")
+    logger.info("Бот запущен в режиме polling...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
