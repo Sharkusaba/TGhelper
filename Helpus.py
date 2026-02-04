@@ -251,42 +251,42 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             reply_markup=reply_markup
         )
 
-    elif data == "program":
-        keyboard = [
-            [create_button("📋 Полная программа", callback_data="full_program")],
-            [create_button("↩️ Назад", callback_data="about")]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+   elif data == "program":
+    keyboard = [
+        [create_button("📖 Полная программа", callback_data="full_program")],
+        [create_button("🔙 Назад", callback_data="about")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
 
-        if query.message.photo:
-            await query.edit_message_caption(
-                caption=PROGRAM_TEXT,
-                parse_mode='Markdown',
-                reply_markup=reply_markup
-            )
-        else:
-            await query.message.delete()
-            await context.bot.send_photo(
-                chat_id=query.message.chat_id,
-                photo=MAIN_PHOTO_URL,
-                caption=PROGRAM_TEXT,
-                parse_mode='Markdown',
-                reply_markup=reply_markup
-            )
-
-    elif data == "full_program":
-        keyboard = [
-            [create_button("🔙 Назад к программе", callback_data="program")]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-
-        await context.bot.send_message(
-            chat_id=query.message.chat_id,
-            text=FULL_PROGRAM_TEXT,
-            parse_mode='Markdown',
-            reply_markup=reply_markup,
-            disable_web_page_preview=True
+    if query.message.photo:
+        await query.edit_message_caption(
+            caption=PROGRAM_TEXT,
+            parse_mode='HTML',  # ИЗМЕНИЛИ с 'Markdown' на 'HTML'
+            reply_markup=reply_markup
         )
+    else:
+        await query.message.delete()
+        await context.bot.send_photo(
+            chat_id=query.message.chat_id,
+            photo=MAIN_PHOTO_URL,
+            caption=PROGRAM_TEXT,
+            parse_mode='HTML',  # ИЗМЕНИЛИ
+            reply_markup=reply_markup
+        )
+
+   elif data == "full_program":
+    keyboard = [
+        [create_button("🔙 Назад к программе", callback_data="program")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await context.bot.send_message(
+        chat_id=query.message.chat_id,
+        text=FULL_PROGRAM_TEXT,
+        parse_mode='HTML',  # ИЗМЕНИЛИ
+        reply_markup=reply_markup,
+        disable_web_page_preview=True
+    )
 
     elif data == "regions":
         keyboard = []
@@ -372,3 +372,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+
