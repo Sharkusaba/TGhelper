@@ -122,7 +122,7 @@ FULL_PROGRAM_TEXT = """<b>📜 Наша программа</b>
 Установление русско-японской унии.
 
 <b>📚 Новое русское образование</b>
-Роспуск Минпросвещения. Бюджет на образования будет перераспределён.
+Роспуск Минпросвещения. Бюджет на образование будет перераспределён.
 
 <b>🤖 Национальное нейробудущее</b>
 ИИ-корпорации должны стать государствообразующими. Россия принимает курс на покупку OpenAI.
@@ -259,21 +259,16 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        if query.message.photo:
-            await query.edit_message_caption(
-                caption=PROGRAM_TEXT,
-                parse_mode='HTML',
-                reply_markup=reply_markup
-            )
-        else:
-            await query.message.delete()
-            await context.bot.send_photo(
-                chat_id=query.message.chat_id,
-                photo=MAIN_PHOTO_URL,
-                caption=PROGRAM_TEXT,
-                parse_mode='HTML',
-                reply_markup=reply_markup
-            )
+        # Всегда отправляем новое сообщение с фото и программой
+        # Это нужно потому что программа слишком длинная для редактирования подписи
+        await query.message.delete()
+        await context.bot.send_photo(
+            chat_id=query.message.chat_id,
+            photo=MAIN_PHOTO_URL,
+            caption=PROGRAM_TEXT,
+            parse_mode='HTML',
+            reply_markup=reply_markup
+        )
 
     elif data == "full_program":
         keyboard = [
